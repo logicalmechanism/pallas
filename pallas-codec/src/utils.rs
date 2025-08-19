@@ -1265,6 +1265,7 @@ where
     }
 }
 
+
 impl<'b, C, T> minicbor::Decode<'b, C> for Nullable<T>
 where
     T: minicbor::Decode<'b, C> + std::clone::Clone,

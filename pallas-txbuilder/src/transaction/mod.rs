@@ -23,6 +23,7 @@ type Signature = Bytes64;
 #[derive(Clone, PartialEq, Eq, Hash, Debug, PartialOrd, Ord)]
 pub struct Hash28(pub [u8; 28]);
 
+
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Bytes(pub Vec<u8>);
 

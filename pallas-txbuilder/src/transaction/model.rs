@@ -11,12 +11,11 @@ use std::{collections::HashMap, ops::Deref};
 use serde::{Deserialize, Serialize};
 
 use crate::{scriptdata, TxBuilderError};
-
+use pallas_codec::minicbor;
 use super::{
     AssetName, Bytes, Bytes32, Bytes64, DatumBytes, DatumHash, Hash28, PolicyId, PubKeyHash,
-    PublicKey, ScriptBytes, ScriptHash, Signature, TransactionStatus, TxHash,
-};
-
+    PublicKey, ScriptBytes, ScriptHash, Signature, TransactionStatus, TxHash};
+use pallas_primitives::conway::AuxiliaryData;
 // TODO: Don't make wrapper types public
 #[derive(Default, Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
 pub struct StagingTransaction {
@@ -40,10 +39,10 @@ pub struct StagingTransaction {
     pub signature_amount_override: Option<u8>,
     pub change_address: Option<Address>,
     pub language_view: Option<scriptdata::LanguageView>,
+    pub auxiliary_data: Option<AuxiliaryData>
     // pub certificates: TODO
     // pub withdrawals: TODO
     // pub updates: TODO
-    // pub auxiliary_data: TODO
     // pub phase_2_valid: TODO
 }
 
@@ -370,6 +369,18 @@ impl StagingTransaction {
 
     pub fn clear_change_address(mut self) -> Self {
         self.change_address = None;
+        self
+    }
+
+    pub fn add_auxiliary_data(mut self, data: Vec<u8>) -> Self {
+        if let Ok(aux) = minicbor::decode::<AuxiliaryData>(data.as_ref()) {
+            self.auxiliary_data = Some(aux);
+        }
+        self
+    }
+
+    pub fn clear_auxiliary_data(mut self) -> Self {
+        self.auxiliary_data = None;
         self
     }
 }

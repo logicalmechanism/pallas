@@ -242,7 +242,7 @@ impl BuildConway for StagingTransaction {
                 fee: self.fee.unwrap_or_default(),
                 certificates: None,        // TODO
                 withdrawals: None,         // TODO
-                auxiliary_data_hash: None, // TODO (accept user input)
+                auxiliary_data_hash: None,
                 mint,
                 script_data_hash,
                 collateral,
@@ -271,14 +271,14 @@ impl BuildConway for StagingTransaction {
                 },
             },
             success: true,               // TODO
-            auxiliary_data: None.into(), // TODO
+            auxiliary_data: self.auxiliary_data.into(),
         };
 
         // TODO: pallas auxiliary_data_hash should be Hash<32> not Bytes
         pallas_tx.transaction_body.auxiliary_data_hash = pallas_tx
             .auxiliary_data
             .clone()
-            .map(|ad| ad.compute_hash().to_vec().into())
+            .map(|ad| ad.compute_hash())
             .into();
 
         Ok(BuiltTransaction {
