@@ -904,3 +904,68 @@ fn plutus_tx_emits_map_form_redeemers() {
         "redeemers should be encoded as a Conway map"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Group G — error reporting
+// ---------------------------------------------------------------------------
+//
+// Pin the `TxBuilderError` Display strings and the build paths that produce
+// them, guarding against copy-pasted / mislabelled error messages.
+
+use pallas_txbuilder::TxBuilderError;
+
+/// `MalformedScript` must describe a script decode failure — it previously
+/// carried a copy-pasted "Transaction has no inputs" message.
+#[test]
+fn malformed_script_error_displays_script_message() {
+    assert_eq!(
+        TxBuilderError::MalformedScript.to_string(),
+        "Could not decode script bytes",
+    );
+}
+
+/// Building with undecodable native-script bytes surfaces `MalformedScript`.
+#[test]
+fn build_with_malformed_native_script_errs() {
+    let err = minimal_tx()
+        .script(ScriptKind::Native, vec![0xff])
+        .build_conway_raw()
+        .unwrap_err();
+
+    assert_eq!(err, TxBuilderError::MalformedScript);
+}
+
+/// A redeemer whose data cannot be decoded reports `MalformedRedeemer`, not the
+/// misleading datum error it used to share.
+#[test]
+fn build_with_malformed_redeemer_errs() {
+    assert_eq!(
+        TxBuilderError::MalformedRedeemer.to_string(),
+        "Could not decode redeemer bytes",
+    );
+
+    let err = minimal_tx()
+        .add_spend_redeemer(
+            Input::new(hash32(0), 0),
+            vec![0xff],
+            Some(ExUnits {
+                mem: 1_000_000,
+                steps: 1_000_000,
+            }),
+        )
+        .build_conway_raw()
+        .unwrap_err();
+
+    assert_eq!(err, TxBuilderError::MalformedRedeemer);
+}
+
+/// A redeemer with no explicit `ExUnits` still hits the unimplemented budget
+/// calculation. Pin the (corrected) panic message; this test is rewritten once
+/// the build path stops panicking in a later PR.
+#[test]
+#[should_panic(expected = "ExUnits budget calculation not yet implemented")]
+fn unset_ex_units_panics_with_corrected_message() {
+    let _ = minimal_tx()
+        .add_spend_redeemer(Input::new(hash32(0), 0), vec![0x00], None)
+        .build_conway_raw();
+}

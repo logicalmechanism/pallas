@@ -183,11 +183,11 @@ impl BuildConway for StagingTransaction {
                         steps: *steps,
                     }
                 } else {
-                    todo!("ExUnits budget calculation not yet implement") // TODO
+                    todo!("ExUnits budget calculation not yet implemented") // TODO
                 };
 
                 let data = PlutusData::decode_fragment(pd.as_ref())
-                    .map_err(|_| TxBuilderError::MalformedDatum)?;
+                    .map_err(|_| TxBuilderError::MalformedRedeemer)?;
 
                 match purpose {
                     RedeemerPurpose::Spend(txin) => {

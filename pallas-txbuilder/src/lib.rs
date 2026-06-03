@@ -56,11 +56,14 @@ pub use transaction::{
 #[derive(Debug, Clone, PartialEq, thiserror::Error)]
 pub enum TxBuilderError {
     /// Provided bytes could not be decoded into a script
-    #[error("Transaction has no inputs")]
+    #[error("Could not decode script bytes")]
     MalformedScript,
     /// Provided bytes could not be decoded into a datum
     #[error("Could not decode datum bytes")]
     MalformedDatum,
+    /// Provided bytes could not be decoded into a redeemer
+    #[error("Could not decode redeemer bytes")]
+    MalformedRedeemer,
     /// Provided datum hash was not 32 bytes in length
     #[error("Invalid bytes length for datum hash")]
     MalformedDatumHash,
