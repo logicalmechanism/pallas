@@ -933,17 +933,23 @@ fn build_with_malformed_native_script_errs() {
         .unwrap_err();
 
     assert_eq!(err, TxBuilderError::MalformedScript);
+    assert_eq!(err.to_string(), "Could not decode script bytes");
 }
 
-/// A redeemer whose data cannot be decoded reports `MalformedRedeemer`, not the
-/// misleading datum error it used to share.
+/// `MalformedRedeemer` carries its own message, distinct from the datum error
+/// it used to share.
 #[test]
-fn build_with_malformed_redeemer_errs() {
+fn malformed_redeemer_error_displays_redeemer_message() {
     assert_eq!(
         TxBuilderError::MalformedRedeemer.to_string(),
         "Could not decode redeemer bytes",
     );
+}
 
+/// A redeemer whose data cannot be decoded surfaces `MalformedRedeemer` from the
+/// build path, not the misleading datum error it used to share.
+#[test]
+fn build_with_malformed_redeemer_errs() {
     let err = minimal_tx()
         .add_spend_redeemer(
             Input::new(hash32(0), 0),
@@ -957,6 +963,7 @@ fn build_with_malformed_redeemer_errs() {
         .unwrap_err();
 
     assert_eq!(err, TxBuilderError::MalformedRedeemer);
+    assert_eq!(err.to_string(), "Could not decode redeemer bytes");
 }
 
 /// A redeemer with no explicit `ExUnits` still hits the unimplemented budget
